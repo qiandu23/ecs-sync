@@ -45,7 +45,7 @@ public final class S3Util {
      * This pattern is used to activate the S3 plugins
      */
     public static final String URI_PREFIX = "s3:";
-    public static final String URI_PATTERN = "^" + URI_PREFIX + "(?:(http|https)://)?([^:]+):([a-zA-Z0-9\\+/=]+)@?(?:([^/]*?)(:[0-9]+)?)?(?:/(.*))?$";
+    public static final String URI_PATTERN =  "(?:(http|https)://)?([^:]+):([a-zA-Z0-9\\+/=]+)@?(?:([^/]*?)(:[0-9]+)?)?(?:/(.*))?$";
     public static final String PATTERN_DESC = URI_PREFIX + "[http[s]://]access_key:secret_key@[host[:port]][/root-prefix]";
 
     public static final String ACL_GROUP_TYPE = "Group";
@@ -56,10 +56,14 @@ public final class S3Util {
     }
 
     public static S3Uri parseUri(String uri) {
-        Pattern p = Pattern.compile(URI_PATTERN);
+        return parseUri(uri, URI_PREFIX);
+    }
+
+    public static S3Uri parseUri(String uri, String prefix) {
+        Pattern p = Pattern.compile("^" + prefix + URI_PATTERN);
         Matcher m = p.matcher(uri);
         if (!m.matches()) {
-            throw new ConfigurationException(String.format("URI does not match %s pattern (%s)", URI_PREFIX, PATTERN_DESC));
+            throw new ConfigurationException(String.format("URI does not match %s pattern (%s)", prefix, PATTERN_DESC));
         }
 
         S3Uri s3Uri = new S3Uri();
@@ -95,11 +99,15 @@ public final class S3Util {
         public String secretKey;
         public String rootKey;
 
-        public String toUri() {
-            String uri = URI_PREFIX + accessKey + ":" + secretKey + "@";
+        public String toUri(String prefix) {
+            String uri = prefix + accessKey + ":" + secretKey + "@";
             if (endpoint != null) uri += endpoint;
             if (rootKey != null) uri += rootKey;
             return uri;
+        }
+
+        public String toUri() {
+            return toUri(URI_PREFIX);
         }
     }
 

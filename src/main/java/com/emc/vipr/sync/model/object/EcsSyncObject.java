@@ -14,8 +14,8 @@
  */
 package com.emc.vipr.sync.model.object;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.emc.object.s3.S3Client;
+import com.emc.object.s3.S3ObjectMetadata;
 import com.emc.vipr.sync.SyncPlugin;
 import com.emc.vipr.sync.model.Checksum;
 import com.emc.vipr.sync.model.SyncMetadata;
@@ -26,13 +26,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class S3SyncObject extends AbstractSyncObject<String> {
+public class EcsSyncObject extends AbstractSyncObject<String> {
     protected SyncPlugin parentPlugin;
-    protected AmazonS3 s3;
+    protected S3Client s3;
     protected String bucketName;
     protected String key;
 
-    public S3SyncObject(SyncPlugin parentPlugin, AmazonS3 s3, String bucketName, String key, String relativePath, boolean isCommonPrefix) {
+    public EcsSyncObject(SyncPlugin parentPlugin, S3Client s3, String bucketName, String key, String relativePath, boolean isCommonPrefix) {
         super(S3Util.fullPath(bucketName, key), S3Util.fullPath(bucketName, key), relativePath, isCommonPrefix);
         this.parentPlugin = parentPlugin;
         this.s3 = s3;
@@ -43,7 +43,7 @@ public class S3SyncObject extends AbstractSyncObject<String> {
     @Override
     public InputStream createSourceInputStream() {
         if (isDirectory()) return null;
-        return new BufferedInputStream(s3.getObject(bucketName, key).getObjectContent(), parentPlugin.getBufferSize());
+        return new BufferedInputStream(s3.getObject(bucketName, key).getObject(), parentPlugin.getBufferSize());
     }
 
     @Override
@@ -51,26 +51,26 @@ public class S3SyncObject extends AbstractSyncObject<String> {
         if (isDirectory()) return;
 
         // load metadata
-        ObjectMetadata s3meta = s3.getObjectMetadata(bucketName, key);
+        S3ObjectMetadata s3meta = s3.getObjectMetadata(bucketName, key);
         SyncMetadata meta = toSyncMeta(s3meta);
 
-        if (parentPlugin.isIncludeAcl()) {
-            meta.setAcl(S3Util.syncAclFromS3Acl(s3.getObjectAcl(bucketName, key)));
-        }
-
+//        if (parentPlugin.isIncludeAcl()) {
+//            meta.setAcl(S3Util.syncAclFromS3Acl(s3.getObjectAcl(bucketName, key)));
+//        }
+//
         metadata = meta;
     }
 
-    protected SyncMetadata toSyncMeta(ObjectMetadata s3meta) {
+    protected SyncMetadata toSyncMeta(S3ObjectMetadata s3meta) {
         SyncMetadata meta = new SyncMetadata();
 
         meta.setCacheControl(s3meta.getCacheControl());
         meta.setContentDisposition(s3meta.getContentDisposition());
         meta.setContentEncoding(s3meta.getContentEncoding());
-        if (s3meta.getContentMD5() != null) meta.setChecksum(new Checksum("MD5", s3meta.getContentMD5()));
+        if (s3meta.getContentMd5() != null) meta.setChecksum(new Checksum("MD5", s3meta.getContentMd5()));
         meta.setContentType(s3meta.getContentType());
-        meta.setHttpExpires(s3meta.getHttpExpiresDate());
-        meta.setExpirationDate(s3meta.getExpirationTime());
+        meta.setHttpExpires(s3meta.getHttpExpires());
+        meta.setExpirationDate(s3meta.getExpirationDate());
         meta.setModificationTime(s3meta.getLastModified());
         meta.setSize(s3meta.getContentLength());
         meta.setUserMetadata(toMetaMap(s3meta.getUserMetadata()));
@@ -92,13 +92,5 @@ public class S3SyncObject extends AbstractSyncObject<String> {
 
     public String getKey() {
         return key;
-    }
-
-    @Override
-    public String toString() {
-        return "S3SyncObject{" +
-                "bucketName='" + bucketName + '\'' +
-                ", key='" + key + '\'' +
-                '}';
     }
 }
