@@ -173,7 +173,7 @@ public class ECSNamespaceCopyTarget extends SyncTarget {
 
             // at this point we know we are going to write the object
             S3SyncObject srcObj = (S3SyncObject)obj;
-            CopyObjectRequest req = new CopyObjectRequest(srcObj.getBucketName(), srcObj.getBucketName(), bucketName, targetKey);
+            CopyObjectRequest req = new CopyObjectRequest(srcObj.getBucketName(), srcObj.getKey(), bucketName, targetKey);
             req.withSourceNamespace(sourceNamespace);
 
             LogMF.debug(l4j, "SS Copy: %s:%s/%s -> %s/%s", new Object[] {sourceNamespace, srcObj.getBucketName(), srcObj.getKey(), bucketName, targetKey});
