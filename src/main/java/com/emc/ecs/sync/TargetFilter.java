@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * !!INTERNAL USE ONLY!!
@@ -54,6 +55,8 @@ public class TargetFilter extends AbstractFilter {
 
         SyncObject targetObj = null;
         try {
+            if (this.options.isTargetUppercase())
+                targetId = targetId.toUpperCase();
             targetObj = target.loadObject(targetId);
 
             Date sourceMtime = sourceObj.getMetadata().getModificationTime();
@@ -107,6 +110,11 @@ public class TargetFilter extends AbstractFilter {
             identifier = target.getIdentifier(objectContext.getObject().getRelativePath(), objectContext.getObject().getMetadata().isDirectory());
             objectContext.setTargetId(identifier);
         }
+
+        if (this.options.isTargetUppercase()) {
+            identifier = identifier.toUpperCase();
+        }
+
         return target.loadObject(identifier);
     }
 }
