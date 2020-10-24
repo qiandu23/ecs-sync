@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 public abstract class AbstractStorage<C> extends AbstractPlugin<C> implements SyncStorage<C> {
     private static final Logger log = LoggerFactory.getLogger(AbstractStorage.class);
@@ -73,6 +74,9 @@ public abstract class AbstractStorage<C> extends AbstractPlugin<C> implements Sy
     @Override
     public String createObject(SyncObject object) {
         String identifier = getIdentifier(object.getRelativePath(), object.getMetadata().isDirectory());
+        if (options.isTargetUppercase()) {
+            identifier = identifier.toUpperCase();
+        }
         updateObject(identifier, object);
         return identifier;
     }

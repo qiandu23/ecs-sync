@@ -43,6 +43,7 @@ public class SyncOptions {
     private boolean verify = false;
     private boolean verifyOnly = false;
     private boolean deleteSource = false;
+    private boolean targetUppercase = false;
 
     private int bufferSize = DEFAULT_BUFFER_SIZE;
 
@@ -263,6 +264,15 @@ public class SyncOptions {
         return dbTable;
     }
 
+    @Option(orderIndex = 225, advanced = true, description = "rename target object name is uppercase when sync objects in two s3")
+    public boolean isTargetUppercase() {
+        return targetUppercase;
+    }
+
+    public void setTargetUppercase(boolean targetUppercase) {
+        this.targetUppercase = targetUppercase;
+    }
+
     public void setDbTable(String dbTable) {
         this.dbTable = dbTable;
     }
@@ -372,6 +382,12 @@ public class SyncOptions {
         return this;
     }
 
+    public SyncOptions withTargetUppercase(boolean targetUppercase) {
+        this.targetUppercase = targetUppercase;
+        return this;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -388,6 +404,7 @@ public class SyncOptions {
         if (forceSync != options.forceSync) return false;
         if (verify != options.verify) return false;
         if (verifyOnly != options.verifyOnly) return false;
+        if (targetUppercase != options.targetUppercase) return false;
         if (deleteSource != options.deleteSource) return false;
         if (bufferSize != options.bufferSize) return false;
         if (threadCount != options.threadCount) return false;
@@ -416,6 +433,7 @@ public class SyncOptions {
         result = 31 * result + (forceSync ? 1 : 0);
         result = 31 * result + (verify ? 1 : 0);
         result = 31 * result + (verifyOnly ? 1 : 0);
+        result = 31 * result + (targetUppercase ? 1 : 0);
         result = 31 * result + (deleteSource ? 1 : 0);
         result = 31 * result + bufferSize;
         result = 31 * result + threadCount;
